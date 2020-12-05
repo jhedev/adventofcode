@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ab6ab528d899a65f4202e0e5d1423c38ee16906876af209be0468019b9881e3e
+-- hash: ff0c8e909534bc30eb81b2fbc9ee3f3133afd995138d8f5a502352962a22c2f7
 
 name:           advent02
 version:        0.1.0.0
@@ -27,13 +27,14 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+      AdventOfCode
   other-modules:
       Paths_advent02
   hs-source-dirs:
       src
   build-depends:
       base >=4.7 && <5
+    , split
   default-language: Haskell2010
 
 executable advent02-exe
@@ -46,6 +47,7 @@ executable advent02-exe
   build-depends:
       advent02
     , base >=4.7 && <5
+    , split
   default-language: Haskell2010
 
 test-suite advent02-test
@@ -59,4 +61,5 @@ test-suite advent02-test
   build-depends:
       advent02
     , base >=4.7 && <5
+    , split
   default-language: Haskell2010
