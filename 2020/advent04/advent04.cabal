@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5cf6642c4db87f0d0de6b233a344819792135dfcf155f5530c01672d136d09cd
+-- hash: ced29bb073abd1e109208d565eb230bbbceb6211fdfc54657dfcb2a10a3d1c6d
 
 name:           advent04
 version:        0.1.0.0
@@ -34,6 +34,7 @@ library
       src
   build-depends:
       base >=4.7 && <5
+    , split
   default-language: Haskell2010
 
 executable advent04-exe
@@ -46,6 +47,7 @@ executable advent04-exe
   build-depends:
       advent04
     , base >=4.7 && <5
+    , split
   default-language: Haskell2010
 
 test-suite advent04-test
@@ -59,4 +61,5 @@ test-suite advent04-test
   build-depends:
       advent04
     , base >=4.7 && <5
+    , split
   default-language: Haskell2010
