@@ -2,6 +2,7 @@ module Lib
  where
 
 import Data.Char (ord)
+import Data.List (sort)
 import Data.List.Split (splitWhen, splitEvery)
 
 getLines :: String -> IO [String]
@@ -16,10 +17,13 @@ asIntList = map read
 
 -- Day 01
 
-day01 :: IO Int
+day01 :: IO (Int,Int)
 day01 = do
   inp <- getLines "inputs/input01.txt"
-  return $ maximum $ map (sum . asIntList) $ groupByEmptyLine inp
+  let calories = reverse $ sort $ map (sum . asIntList) $ groupByEmptyLine inp
+      part01 = head calories
+      part02 = sum $ take 3 calories
+  return (part01,part02)
 
 -- Day 02
 
