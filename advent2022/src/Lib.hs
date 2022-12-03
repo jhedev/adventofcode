@@ -1,7 +1,8 @@
 module Lib
  where
 
-import Data.List.Split
+import Data.Char (ord)
+import Data.List.Split (splitWhen, splitEvery)
 
 getLines :: String -> IO [String]
 getLines f = lines <$> readFile f
@@ -57,3 +58,38 @@ scoreByChoice :: Choice -> Int
 scoreByChoice Rock     = 1
 scoreByChoice Paper    = 2
 scoreByChoice Scissors = 3
+
+-- Day 03
+
+day03 :: IO (Int, Int)
+day03 = do
+  inp <- getLines "inputs/input03.txt"
+  let items = map parseItems inp
+      part01 = sum $ map (priority . commonItem . mkRucksack) items
+      part02 = sum $ map (priority . commonInGroup) $ splitEvery 3 items
+  return (part01,part02)
+
+data Item = Item Char deriving (Eq, Show)
+data Rucksack = Rucksack [Item] [Item] deriving (Eq, Show)
+
+parseItems :: String -> [Item]
+parseItems = map Item
+
+mkRucksack :: [Item] -> Rucksack
+mkRucksack is = Rucksack first second
+  where
+    (first,second) = splitAt (length is `div` 2) is
+
+commonItem :: Rucksack -> Item
+commonItem (Rucksack first second) = item
+  where
+    -- ignore if the item type is in one compartment multiple times
+    item:_ = [i | i <- first, j <- second, i == j]
+
+priority :: Item -> Int
+priority (Item c) = if c `elem` ['a'..'z'] then ord c - 96 else ord c - 38
+
+commonInGroup :: [[Item]] -> Item
+commonInGroup [i1,i2,i3] = item
+  where
+    item:_ = [i | i <- i1, j <- i2, k <- i3, i == j, j == k]
