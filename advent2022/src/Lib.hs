@@ -3,17 +3,19 @@ module Lib
 
 import Data.Char (ord)
 import Data.List (sort)
-import Data.List.Split (splitWhen, splitEvery)
+import Data.List.Split (splitWhen, chunksOf)
 
 getLines :: String -> IO [String]
 getLines f = lines <$> readFile f
-
 
 groupByEmptyLine :: [String] -> [[String]]
 groupByEmptyLine = splitWhen (== "")
 
 asIntList :: [String] -> [Int]
 asIntList = map read
+
+mapPair :: (a -> b, c -> d) -> (a,c) -> (b,d)
+mapPair (f1,f2) (t1,t2) = (f1 t1, f2 t2)
 
 -- Day 01
 
@@ -27,14 +29,16 @@ day01 = do
 
 -- Day 02
 
-day02 :: IO Int
+day02 :: IO (Int,Int)
 day02 = do
   inp <- getLines "inputs/input02.txt"
-  let scores = map (evalRound . parseLine) inp
-  return $ sum scores
+  let part01 = sum $ map (evalRound . parseLine) inp
+      part02 = sum $ map (uncurry (+) . mapPair (scoreByChoice, scoreByResult) . mkChoice . parseLine2) inp
+  return (part01, part02)
 
-data Choice = Rock | Paper | Scissors deriving Eq
-data Round = Round { opponent :: Choice, me :: Choice }
+data Choice = Rock | Paper | Scissors deriving (Show, Eq)
+data Round = Round { opponent :: Choice, me :: Choice } deriving (Show, Eq)
+data Result = Win | Draw | Loss deriving (Show, Eq)
 
 parseLine :: String -> Round
 parseLine l = Round { opponent = op, me = me}
@@ -50,18 +54,45 @@ parseLine l = Round { opponent = op, me = me}
       "Z" -> Scissors
 
 evalRound :: Round -> Int
-evalRound r = scoreByChoice (me r) + win r
+evalRound r = scoreByChoice (me r) + scoreByResult (eval r)
 
-win :: Round -> Int
-win Round{opponent=Rock,me=Paper} = 6
-win Round{opponent=Paper,me=Scissors} = 6
-win Round{opponent=Scissors,me=Rock} = 6
-win Round{opponent=o,me=m} = if o == m then 3 else 0
+eval :: Round -> Result
+eval Round{opponent=Rock,me=Paper} = Win
+eval Round{opponent=Paper,me=Scissors} = Win
+eval Round{opponent=Scissors,me=Rock} = Win
+eval Round{opponent=o,me=m} = if o == m then Draw else Loss
 
 scoreByChoice :: Choice -> Int
 scoreByChoice Rock     = 1
 scoreByChoice Paper    = 2
 scoreByChoice Scissors = 3
+
+scoreByResult :: Result -> Int
+scoreByResult Win  = 6
+scoreByResult Draw = 3
+scoreByResult Loss = 0
+
+parseLine2 :: String -> (Choice, Result)
+parseLine2 [op,' ',r] = (opponent,result)
+  where
+    opponent = case op of
+      'A' -> Rock
+      'B' -> Paper
+      'C' -> Scissors
+    result = case r of
+      'X' -> Loss
+      'Y' -> Draw
+      'Z' -> Win
+
+mkChoice :: (Choice,Result) -> (Choice,Result)
+mkChoice (Rock,Win) = (Paper,Win)
+mkChoice (Rock,Loss) = (Scissors,Loss)
+mkChoice (Paper,Win) = (Scissors,Win)
+mkChoice (Paper,Loss) = (Rock,Loss)
+mkChoice (Scissors,Win) = (Rock,Win)
+mkChoice (Scissors,Loss) = (Paper,Loss)
+mkChoice c = c
+
 
 -- Day 03
 
@@ -70,7 +101,7 @@ day03 = do
   inp <- getLines "inputs/input03.txt"
   let items = map parseItems inp
       part01 = sum $ map (priority . commonItem . mkRucksack) items
-      part02 = sum $ map (priority . commonInGroup) $ splitEvery 3 items
+      part02 = sum $ map (priority . commonInGroup) $ chunksOf 3 items
   return (part01,part02)
 
 data Item = Item Char deriving (Eq, Show)
