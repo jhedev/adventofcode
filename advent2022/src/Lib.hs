@@ -4,6 +4,7 @@ module Lib
 import Data.Char (ord)
 import Data.List (sort)
 import Data.List.Split (splitWhen, chunksOf)
+import Text.ParserCombinators.Parsec
 
 getLines :: String -> IO [String]
 getLines f = lines <$> readFile f
@@ -128,3 +129,48 @@ commonInGroup :: [[Item]] -> Item
 commonInGroup [i1,i2,i3] = item
   where
     item:_ = [i | i <- i1, j <- i2, k <- i3, i == j, j == k]
+
+-- Day 04
+
+day04 :: IO (Int, Int)
+day04 = do
+  content <- readFile "inputs/input04.txt"
+  let Right pairs = parseRanges content
+      part01 = sum $ map (fromEnum . inclusion) pairs
+      part02 = sum $ map (fromEnum . overlap) pairs
+  return (part01,part02)
+
+
+data Range = Range Int Int deriving (Show,Eq)
+data RangePair = RangePair Range Range deriving (Show,Eq)
+
+inclusion :: RangePair -> Bool
+inclusion (RangePair (Range from1 to1) (Range from2 to2)) = from1 <= from2 && to1 >= to2 || from1 >= from2 && to1 <= to2
+
+overlap :: RangePair -> Bool
+overlap (RangePair (Range from1 to1) (Range from2 to2))=
+  not(to1 < from2 || from1 > to2)
+
+parseRanges :: String -> Either ParseError [RangePair]
+parseRanges = parse rangeParser ""
+
+rangeParser :: GenParser Char st [RangePair]
+rangeParser = do
+  ls <- many rangePairLine
+  eof
+  return ls
+
+rangePairLine :: GenParser Char st RangePair
+rangePairLine = do
+  first <- range
+  _ <- char ','
+  second <- range
+  _ <- char '\n'
+  return $ RangePair first second
+
+range :: GenParser Char st Range
+range = do
+  from <- read <$> many1 digit
+  _ <- char '-'
+  to <- read <$> many1 digit
+  return $ Range from to
