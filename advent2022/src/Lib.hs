@@ -4,6 +4,7 @@ module Lib
 import Data.Char (ord)
 import Data.List (sort)
 import Data.List.Split (splitWhen, chunksOf)
+import qualified Data.Map as Map
 import Text.ParserCombinators.Parsec
 
 getLines :: String -> IO [String]
@@ -174,3 +175,39 @@ range = do
   _ <- char '-'
   to <- read <$> many1 digit
   return $ Range from to
+
+
+
+-- day05
+
+day05 :: IO (String, Int)
+day05 = do
+  content <- readFile "inputs/input05.txt"
+  let part01 = ""
+      part02 = 0
+  return (part01, part02)
+
+
+-- First element is highest element, last element is lowest
+data Stack = Stack String deriving (Show, Eq)
+data Movement = Movement { number :: Int, from :: Int, to :: Int } deriving (Show, Eq)
+
+data StacksMovements = StacksMovements { stacks :: [Stack], movements :: [Movement]} deriving (Show, Eq)
+
+applyMovement :: (String -> String) -> [Stack] -> Movement -> [Stack]
+applyMovement func st mov = Map.elems $
+                         Map.adjust (elems++) t $
+                         Map.adjust (drop n) f m
+  where
+    n = number mov
+    f = from mov
+    t = to mov
+    m = Map.fromList $ zip [1..] st
+    elems = func $ take n $ Map.(!) m f
+
+
+topCrates :: [Stack] -> [Crate]
+topCrates = map (\(Stack s) -> head s)
+
+parseDay05 :: String -> Either ParseError [StacksMovements]
+parseDay05 = undefined

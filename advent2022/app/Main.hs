@@ -1,6 +1,8 @@
 module Main (main) where
 
-import Lib
+import qualified Day01 as Day01
+
 
 main :: IO ()
-main = undefined
+main = do
+  Day01.main
